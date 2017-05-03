@@ -1,0 +1,195 @@
+<html>
+<head><h1 align="center">Welcome To Minesweeper</h1>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+</head>
+
+<style>
+html{
+	font-family:arial;
+	font-weight: bold;
+	font-size:12px;
+}
+
+table{
+    border-collapse: collapse;
+    font-family:arial;
+}
+
+td{
+    background-color: white;
+    height: 40px;
+    width:  40px;
+    border: 1px solid black;
+	font size="6";
+    text-align: center;
+    vertical-align: middle;
+}
+
+.bomb{
+    background-color: #FF4136;
+    font-size:20px;
+}
+
+.box0{
+	background-color: white;
+}
+.box1{
+	background-color: #01FF70;
+}
+
+.box2{
+	background-color: #FCFF33;
+}
+
+.box3{
+	background-color: #7FDBFF;
+}
+
+.box4{
+	background-color: #FF851B;
+}
+
+button{
+	height:40px;
+	width:40px;
+	background-color: #339CFF;
+}
+
+.new_game{
+	height:40px;
+	width:100px;
+	background-color: #d3d3d3;
+}
+</style>
+
+
+<body>
+	<div id="container" align="center">
+
+		<button class ="new_game" style="background-color:#01FF70;; border-radius: 8px;margin: 6px;" onclick="window.location.reload();"> New Game </button>
+
+			<table class="grid">
+				{% for row in grid %}
+					<tr>
+					{% for ele in row %}
+						<td class = "box">
+                        	<center><button class="tile" id="{{forloop.parentloop.counter}}{{forloop.counter}}" value="{{forloop.parentloop.counter}}{{forloop.counter}}">  </button></center>
+						</td>
+					{% endfor %}
+					</tr>
+				{% endfor %}
+			</table>
+	</div>
+</body>
+</html>
+
+<script type="text/javascript">
+$(document).ready(function() {
+
+     $('.tile').click(function() {
+
+           var value = $(this).attr('id');
+
+           $("#"+value).attr("disabled", true);
+           $.get('/checkStatus/'+value, function(data) // ajax GET request to check the status of each box or field from the backend
+           {
+				var answer = data.result;
+				if (answer != -1 & answer != 0) // answer -1 is for bomb and answer 0 is for empty box
+				{
+           		$("#"+value).text(answer);
+           		}
+
+           		if (answer == -1)
+           		{
+           		var answer_list = data.result_list;
+
+           			for (i = 0; i < answer_list.length; i++) {
+    					$("#"+answer_list[i]).addClass("bomb");
+    					$("#"+answer_list[i]).text("*");
+
+					}
+
+				$(".grid *").prop('disabled', true);
+           		alert("Game Over");
+
+           		}
+
+
+// if we got answer 0, we will find and visit all the empty spaces and its 1-Neighbours.
+           		if (answer == 0)
+           		{
+				var answer_dict = data.result_list;
+
+					$.each(answer_dict, function(key, value) {
+
+    					var value = answer_dict[key];
+
+  						if (answer_dict[key] == 0)
+  						{
+  						$("#"+key).addClass("box0");
+    					$("#"+key).attr("disabled", true);
+  						}
+
+  						if (answer_dict[key] == 1)
+  						{
+  						$("#"+key).addClass("box1");
+    					$("#"+key).attr("disabled", true);
+    					$("#"+key).text(1);
+  						}
+
+  						if (answer_dict[key] == 2)
+  						{
+  						$("#"+key).addClass("box2");
+    					$("#"+key).attr("disabled", true);
+    					$("#"+key).text(2);
+  						}
+
+  						if (answer_dict[key] == 3)
+  						{
+  						$("#"+key).addClass("box3");
+    					$("#"+key).attr("disabled", true);
+    					$("#"+key).text(3);
+  						}
+
+  						if (answer_dict[key] == 4)
+  						{
+  						$("#"+key).addClass("box4");
+    					$("#"+key).attr("disabled", true);
+    					$("#"+key).text(4);
+  						}
+				});
+           		}
+
+
+           		if (answer == 1)
+           		{
+           		$("#"+value).addClass("box1");
+
+           		}
+           		if (answer == 2)
+           		{
+           		$("#"+value).addClass("box2");
+
+           		}
+           		if (answer == 3)
+           		{
+           		$("#"+value).addClass("box3");
+
+           		}
+           		if (answer == 4)
+           		{
+           		$("#"+value).addClass("box4");
+
+           		}
+
+
+           });
+
+
+
+     });
+});
+
+</script>
