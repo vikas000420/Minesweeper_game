@@ -26,7 +26,7 @@ admin.autodiscover()
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^draw/', myapp_views.draw, name='draw'),
-    url(r'^checkStatus/(?P<index_id>\d+)/$', myapp_views.checkStatus, name='checkStatus'),
+    url(r'^draw_ajax/(?P<LengthX>\d+),(?P<LengthY>\d+),(?P<Total_Bombs>\d+)/$', myapp_views.draw_ajax, name='draw_ajax'),
+    url(r'^checkStatus/(?P<index_id_x>\d+),(?P<index_id_y>\d+)/$', myapp_views.checkStatus, name='checkStatus'),
 
 ]
-

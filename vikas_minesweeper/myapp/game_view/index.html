@@ -17,6 +17,46 @@ table{
     font-family:arial;
 }
 
+dropbtn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown-content div {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content div:hover {background-color: #f1f1f1}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown:hover .dropbtn {
+    background-color: #3e8e41;
+}
+
 td{
     background-color: white;
     height: 40px;
@@ -25,11 +65,12 @@ td{
 	font size="6";
     text-align: center;
     vertical-align: middle;
+    font-weight: bold;
 }
 
 .bomb{
     background-color: #FF4136;
-    font-size:20px;
+    font-size:30px;
 }
 
 .box0{
@@ -51,113 +92,227 @@ td{
 	background-color: #FF851B;
 }
 
+.box5{
+	background-color: white;
+}
+.box6{
+	background-color: #01FF70;
+}
+
+.box7{
+	background-color: #FCFF33;
+}
+
+.box8{
+	background-color: #7FDBFF;
+}
+
+.box9{
+	background-color: #FF851B;
+}
+
 button{
 	height:40px;
 	width:40px;
 	background-color: #339CFF;
+	font-weight: bold;
 }
 
-.new_game{
-	height:40px;
-	width:100px;
-	background-color: #d3d3d3;
+/* Tooltip container */
+.dropdown_menu {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
 }
+
+/* Tooltip text */
+.dropdown_menu .tooltiptext {
+    visibility: hidden;
+    width: 250px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+
+    /* Position the tooltip text - see examples below! */
+    position: absolute;
+    z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.dropdown_menu:hover .tooltiptext {
+    visibility: visible;
+}
+
 </style>
 
 
 <body>
 	<div id="container" align="center">
 
-		<button class ="new_game" style="background-color:#01FF70;; border-radius: 8px;margin: 6px;" onclick="window.location.reload();"> New Game </button>
+		<div class="dropdown">
+  			<button class="new_game"  style="background-color:#01FF70;width:100px; border-radius: 8px;margin: 6px;">Select Level</button>
+  			<div class="dropdown-content">
+    			<div class="dropdown_menu" id= "Beginner"> Beginner <span class="tooltiptext">Lenght: 9, Height: 9, Bombs:10 </span></div>
+    			<div class="dropdown_menu" id="Intermediate"> Intermediate <span class="tooltiptext">Lenght: 15, Height: 15, Bombs:60</span></div>
+    			<div class="dropdown_menu" id="Expert"> Expert <span class="tooltiptext">Lenght: 20, Height: 20, Bombs:100</span></div>
+  			</div>
+		</div>
 
+		<div class = "grid_class">
 			<table class="grid">
+
 				{% for row in grid %}
-					<tr>
+
+				<tr>
 					{% for ele in row %}
-						<td class = "box">
-                        	<center><button class="tile" id="{{forloop.parentloop.counter}}{{forloop.counter}}" value="{{forloop.parentloop.counter}}{{forloop.counter}}">  </button></center>
-						</td>
+					<td class = "box">
+						<center><button class="tile" id="{{forloop.parentloop.counter}}s{{forloop.counter}}" name ={{forloop.parentloop.counter}},{{forloop.counter}} value="{{forloop.parentloop.counter}},{{forloop.counter}}">  </button></center>
+					</td>
 					{% endfor %}
-					</tr>
+				</tr>
+
 				{% endfor %}
 			</table>
+		</div>
+
 	</div>
 </body>
 </html>
 
 <script type="text/javascript">
-$(document).ready(function() {
+$(document).ready(function()
+{
 
-     $('.tile').click(function() {
+     $(document).on("click", '.tile', function(event)
+     {
 
-           var value = $(this).attr('id');
-
-           $("#"+value).attr("disabled", true);
+           var value = $(this).attr('name');
+           var value_id = value.replace(/,/g , "s");
+           $("#"+value_id).attr("disabled", true);
            $.get('/checkStatus/'+value, function(data) // ajax GET request to check the status of each box or field from the backend
            {
+
+				var success = data.Success;
+				if (success)
+				{
+
+					$("#"+value_id).text(answer);
+					alert("Congratulations. You won the game!");
+					$(".grid *").prop('disabled', true);
+
+				}
+
+
 				var answer = data.result;
 				if (answer != -1 & answer != 0) // answer -1 is for bomb and answer 0 is for empty box
 				{
-           		$("#"+value).text(answer);
+
+           			$("#"+value_id).text(answer);
+
            		}
+
 
            		if (answer == -1)
            		{
-           		var answer_list = data.result_list;
 
-           			for (i = 0; i < answer_list.length; i++) {
-    					$("#"+answer_list[i]).addClass("bomb");
-    					$("#"+answer_list[i]).text("*");
+           			var answer_list = data.result_list;
+           			for (i = 0; i < answer_list.length; i++)
+           			 {
 
-					}
+           				var answer_id = (answer_list[i][0].toString()) +"s"+ (answer_list[i][1].toString());
+    					$("#"+answer_id).addClass("bomb");
+    					$("#"+answer_id).text("*");
 
-				$(".grid *").prop('disabled', true);
-           		alert("Game Over");
+					 }
+					$(".grid *").prop('disabled', true);
+           			alert("Wrong Move. Game Over");
 
            		}
 
 
-// if we got answer 0, we will find and visit all the empty spaces and its 1-Neighbours.
+				// if we got answer 0, we will find and visit
+				// all the empty spaces and its 1-Neighbours.
+
            		if (answer == 0)
            		{
-				var answer_dict = data.result_list;
-
+					var answer_dict = data.result_list;
 					$.each(answer_dict, function(key, value) {
-
     					var value = answer_dict[key];
+    					var key_split = key.split(",");
+    					var key_1 = key_split[0].replace ( /[^\d.]/g, '' );
+    					var key_2 = key_split[1].replace ( /[^\d.]/g, '' );
+						var key_id = (key_1 + "s" + key_2);
 
   						if (answer_dict[key] == 0)
+
   						{
-  						$("#"+key).addClass("box0");
-    					$("#"+key).attr("disabled", true);
+  							$("#"+key_id).addClass("box0");
+    						$("#"+key_id).attr("disabled", true);
   						}
 
   						if (answer_dict[key] == 1)
   						{
-  						$("#"+key).addClass("box1");
-    					$("#"+key).attr("disabled", true);
-    					$("#"+key).text(1);
+  							$("#"+key_id).addClass("box1");
+    						$("#"+key_id).attr("disabled", true);
+    						$("#"+key_id).text(1);
   						}
 
   						if (answer_dict[key] == 2)
   						{
-  						$("#"+key).addClass("box2");
-    					$("#"+key).attr("disabled", true);
-    					$("#"+key).text(2);
+  							$("#"+key_id).addClass("box2");
+    						$("#"+key_id).attr("disabled", true);
+    						$("#"+key_id).text(2);
   						}
 
   						if (answer_dict[key] == 3)
   						{
-  						$("#"+key).addClass("box3");
-    					$("#"+key).attr("disabled", true);
-    					$("#"+key).text(3);
+  							$("#"+key_id).addClass("box3");
+    						$("#"+key_id).attr("disabled", true);
+    						$("#"+key_id).text(3);
   						}
 
   						if (answer_dict[key] == 4)
   						{
-  						$("#"+key).addClass("box4");
-    					$("#"+key).attr("disabled", true);
-    					$("#"+key).text(4);
+  							$("#"+key_id).addClass("box4");
+    						$("#"+key_id).attr("disabled", true);
+    						$("#"+key_id).text(4);
+  						}
+
+  						if (answer_dict[key] == 5)
+  						{
+  							$("#"+key_id).addClass("box5");
+    						$("#"+key_id).attr("disabled", true);
+    						$("#"+key_id).text(5);
+  						}
+
+  						if (answer_dict[key] == 6)
+  						{
+  							$("#"+key_id).addClass("box6");
+    						$("#"+key_id).attr("disabled", true);
+    						$("#"+key_id).text(6);
+  						}
+
+  						if (answer_dict[key] == 7)
+  						{
+  							$("#"+key_id).addClass("box7");
+    						$("#"+key_id).attr("disabled", true);
+    						$("#"+key_id).text(7);
+  						}
+
+  						if (answer_dict[key] == 8)
+  						{
+  							$("#"+key_id).addClass("box8");
+    						$("#"+key_id).attr("disabled", true);
+    						$("#"+key_id).text(8);
+  						}
+
+  						if (answer_dict[key] == 9)
+  						{
+  							$("#"+key_id).addClass("box9");
+    						$("#"+key_id).attr("disabled", true);
+    						$("#"+key_id).text(9);
   						}
 				});
            		}
@@ -165,31 +320,94 @@ $(document).ready(function() {
 
            		if (answer == 1)
            		{
-           		$("#"+value).addClass("box1");
-
+           			$("#"+value_id).addClass("box1");
            		}
+
            		if (answer == 2)
            		{
-           		$("#"+value).addClass("box2");
+           			$("#"+value_id).addClass("box2");
 
            		}
+
            		if (answer == 3)
            		{
-           		$("#"+value).addClass("box3");
-
+           			$("#"+value_id).addClass("box3");
            		}
+
            		if (answer == 4)
            		{
-           		$("#"+value).addClass("box4");
-
+           			$("#"+value_id).addClass("box4");
            		}
-
-
            });
-
-
-
      });
+
+
+
+
+	 $('#container').on("click", '.dropdown_menu', function(event)  {
+     		event.preventDefault();
+
+     		var dropdown_id = $(this).attr('id');
+     		var LengthX = "9"
+     		var LengthY = "9"
+     		var Total_Bombs = "10"
+
+     		if (dropdown_id == "Intermediate")
+     		{
+
+     			LengthX = "15"
+     			LengthY = "15"
+     			Total_Bombs = "60"
+
+     		}
+
+     		if (dropdown_id == "Expert"){
+
+				LengthX = "20"
+     			LengthY = "20"
+     			Total_Bombs = "100"
+
+     		}
+
+
+			var param =  LengthX +","+ LengthY +","+ Total_Bombs
+
+
+
+			// ajax GET request to check the status
+			// of each box or field from the backend
+
+           $.get('/draw_ajax/'+param, function(data)
+           {
+
+           		var rows = data.length_x + 1 ;
+           		var columns = data.length_y + 1 ;
+
+				$(".grid_class table").remove();
+
+           		$('.grid_class').append('<table class="grid">');
+
+           		for (var row = 1; row < rows; row++)
+           		{
+
+					$('.grid').append('<tr>');
+					for (var col = 1; col < columns; col++)
+					{
+						var row_str = row.toString();
+                        var col_str = col.toString();
+                        var id_str = row_str + "s" + col_str
+                        var name_value_str = row_str + "," + col_str
+						$('.grid').append('<td class = "box"> <center><button class="tile" id='+id_str +' name=' + name_value_str +' value =' + name_value_str + '> </button></center></td>');
+
+					}
+					$('.grid').append('</tr>');
+
+				}
+				$('.grid_class').append('</table>');
+
+     		});
+     });
+
 });
 
 </script>
