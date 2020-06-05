@@ -1,4 +1,4 @@
-Django==1.11
+Django==1.11.29
 MySQL-python==1.2.5
 PAM==0.4.2
 Pillow==2.3.0
